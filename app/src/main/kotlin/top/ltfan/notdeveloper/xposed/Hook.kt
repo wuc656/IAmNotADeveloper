@@ -94,7 +94,7 @@ class Hook : IXposedHookLoadPackage {
             oldApiCallback,
         )
         XposedHelpers.findAndHookMethod(
-            "com.google.android.play",
+            "com.android.vending",
             lpparam.classLoader,
             "requestIntegrityToken",
             String::class.java, // app package name?
