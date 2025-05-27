@@ -93,12 +93,9 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             oldApiCallback,
         )
-        val targetClass = XposedHelpers.findClass(
-            "com.google.android.play", 
-            lpparam.classLoader
-        )
         XposedHelpers.findAndHookMethod(
-            targetClass, 
+            "com.google.android.play",
+            lpparam.classLoader,
             "requestIntegrityToken",
             String::class.java, // app package name?
                 object : XC_MethodHook() {
