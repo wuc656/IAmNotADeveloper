@@ -21,7 +21,7 @@ import kotlin.reflect.jvm.isAccessible
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         XposedHelpers.findAndHookMethod(
-            "com.google.android.play.integrity",
+            "com.google.android.play.core.integrity.IntegrityTokenRequest",
             lpparam.classLoader,
             "requestIntegrityToken",
             String::class.java, // app package name?
@@ -40,7 +40,7 @@ class Hook : IXposedHookLoadPackage {
                 }
             )
         // Kotlin - 使用 LSPosed API
-        val clazz = XposedHelpers.findClass("com.google.android.play.integrity", lpparam.classLoader)
+        val clazz = XposedHelpers.findClass("com.google.android.play.core.integrity", lpparam.classLoader)
         for (method in clazz.declaredMethods) {
             Log.d("找到 method: ${method.name}")
         }
