@@ -25,11 +25,28 @@ class Hook : IXposedHookLoadPackage {
         for (method in clazz.declaredMethods) {
             Log.d("找到 method: ${method.name}")
         }
+        XposedHelpers.findAndHookMethod(
+            "com.google.android.play.core.integrity.IntegrityTokenRequest",
+            lpparam.classLoader,
+            "requestIntegrityToken",
+            String::class.java, // app package name?
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                        Log.d("暫時修改 SDK_INT 為 32")
+                    }
 
-        processSystemProps(prefs, lpparam)
-        //if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
-            //return
-        //}
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", android.os.Build.VERSION.SDK_INT)
+                        Log.d("還原 SDK_INT")
+                    }
+                }
+        )
+        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
+            return
+        }
 
         Log.d("processing package ${lpparam.packageName}")
 
@@ -100,26 +117,7 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             oldApiCallback,
         )
-
-        XposedHelpers.findAndHookMethod(
-            "com.google.android.play.core.integrity.IntegrityTokenRequest",
-            lpparam.classLoader,
-            "requestIntegrityToken",
-            String::class.java, // app package name?
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        Log.d("暫時修改 SDK_INT 為 32")
-                    }
-
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", android.os.Build.VERSION.SDK_INT)
-                        Log.d("還原 SDK_INT")
-                    }
-                }
-        )
+        processSystemProps(prefs, lpparam)
     }
 
     private fun processSystemProps(prefs: XSharedPreferences, lpparam: LoadPackageParam) {
