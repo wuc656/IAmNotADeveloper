@@ -12,6 +12,10 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.Item
+import java.util.concurrent.Executor
+import java.util.function.Consumer
+import java.lang.reflect.Field
+import kotlin.reflect.jvm.isAccessible
 
 @Keep
 class Hook : IXposedHookLoadPackage {
