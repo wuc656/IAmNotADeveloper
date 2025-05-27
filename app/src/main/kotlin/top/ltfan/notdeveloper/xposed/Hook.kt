@@ -100,17 +100,15 @@ class Hook : IXposedHookLoadPackage {
             String::class.java, // app package name?
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
-                        sdkField.isAccessible = true
-                        sdkField.set(null, 32)
-                        Log.d("暫時修改 SDK_INT 為 32")
+                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                        XposedBridge.log("暫時修改 SDK_INT 為 32")
                     }
 
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
-                        sdkField.isAccessible = true
-                        sdkField.set(null, android.os.Build.VERSION.SDK_INT)
-                        Log.d("還原 SDK_INT")
+                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", android.os.Build.VERSION.SDK_INT)
+                        XposedBridge.log("還原 SDK_INT")
                     }
                 }
             )
