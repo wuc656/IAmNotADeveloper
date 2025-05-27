@@ -21,9 +21,15 @@ import kotlin.reflect.jvm.isAccessible
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
-        val allClasses = lpparam.classLoader::class.java.methods
-            .firstOrNull { it.name == "loadClass" } ?: return
-        Log.d("loadClass method 找到: $allClasses")
+        try {
+            val className = "com.google.android.play.core.integrity.IntegrityManager"
+            val clazz = Class.forName(className, false, lpparam.classLoader)
+        for (method in clazz.declaredMethods) {
+           Log.d("找到 method: ${method.name}")
+        }
+        } catch (e: ClassNotFoundException) {
+            Log.d("IntegrityManager class 沒找到 ${lpparam.packageName}")
+        }
         XposedHelpers.findAndHookMethod(
             "com.google.android.play.core.integrity.IntegrityTokenRequest",
             lpparam.classLoader,
