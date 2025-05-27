@@ -42,7 +42,7 @@ class Hook : IXposedHookLoadPackage {
                     XposedBridge.log("還原 SDK_INT");
                 }
             }
-        );
+        )
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
