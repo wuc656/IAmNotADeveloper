@@ -30,11 +30,15 @@ class Hook : IXposedHookLoadPackage {
         } catch (e: ClassNotFoundException) {
             Log.d("IntegrityManager class 沒找到 ${lpparam.packageName}")
         }
+        val requestClass = XposedHelpers.findClass(
+            "com.google.android.play.core.integrity.IntegrityTokenRequest",
+            lpparam.classLoader
+        )
         XposedHelpers.findAndHookMethod(
             "com.google.android.play.core.integrity.IntegrityManager",
             lpparam.classLoader,
             "requestIntegrityToken",
-            String::class.java, // app package name?
+            requestClass,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
