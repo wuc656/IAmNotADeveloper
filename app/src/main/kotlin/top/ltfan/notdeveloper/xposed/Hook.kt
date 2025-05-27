@@ -16,11 +16,17 @@ import java.util.concurrent.Executor
 import java.util.function.Consumer
 import java.lang.reflect.Field
 import kotlin.reflect.jvm.isAccessible
+import dalvik.system.DexFile
 
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
+        DexFile(lpparam.appInfo.sourceDir).entries().toList().forEach { className ->
+        if (className.contains("integrity", ignoreCase = true)) {
+                Log.d("[Xposed] Class測試: $className")
+            }
+        }
         try {
             val className = "com.google.android.play.core.integrity.IntegrityManager"
             val clazz = Class.forName(className, false, lpparam.classLoader)
