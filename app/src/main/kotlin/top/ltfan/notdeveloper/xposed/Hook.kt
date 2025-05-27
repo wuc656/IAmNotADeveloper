@@ -20,6 +20,7 @@ import kotlin.reflect.jvm.isAccessible
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
+        Log.d("開啟: ${lpparam.packageName}")
         // Kotlin - 使用 LSPosed API
         val clazz = XposedHelpers.findClass("com.google.android.play.core.integrity", lpparam.classLoader)
         for (method in clazz.declaredMethods) {
@@ -48,7 +49,7 @@ class Hook : IXposedHookLoadPackage {
             return
         }
 
-        Log.d("processing package ${lpparam.packageName}")
+        //Log.d("processing package ${lpparam.packageName}")
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
@@ -154,7 +155,7 @@ class Hook : IXposedHookLoadPackage {
                         if (!prefs.getBoolean(Item.AdbEnabled.key, true)) return
 
                         val arg = param.args[0] as String
-                        Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+                        //Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
                         if (param.method.name != methodGet && arg != ffsReady) {
                             Log.i("props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
@@ -178,7 +179,7 @@ class Hook : IXposedHookLoadPackage {
                             svcAdbd -> param.result = overrideSvcAdbd
                         }
 
-                        Log.d("processed ${param.method.name}($arg): ${param.result}")
+                        //Log.d("processed ${param.method.name}($arg): ${param.result}")
                     }
                 }
             )
@@ -192,17 +193,17 @@ class Hook : IXposedHookLoadPackage {
         vararg items: Item
     ) {
         val arg = param.args[1] as String
-        Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+        //Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
         items.forEach { item ->
             val key = item.key
             if (prefs.getBoolean(key, true) && arg == key) {
                 param.result = 0
-                Log.d("processed ${param.method.name}($arg): ${param.result}")
+                //Log.d("processed ${param.method.name}($arg): ${param.result}")
                 return
             }
         }
 
-        Log.d("processed ${param.method.name}($arg) without changing result")
+        //Log.d("processed ${param.method.name}($arg) without changing result")
     }
 }
