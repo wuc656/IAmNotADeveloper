@@ -20,7 +20,7 @@ import kotlin.reflect.jvm.isAccessible
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
+        if (lpparam.packageName.startsWith("android")) {
             return
         }
 
