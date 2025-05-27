@@ -94,7 +94,7 @@ class Hook : IXposedHookLoadPackage {
             oldApiCallback,
         )
         XposedHelpers.findAndHookMethod(
-            "com.android.vending",
+            "com.google.android.play.integrity",
             lpparam.classLoader,
             "requestIntegrityToken",
             String::class.java, // app package name?
@@ -112,6 +112,11 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             )
+        // Kotlin - 使用 LSPosed API
+        val clazz = XposedHelpers.findClass("com.google.android.play.integrity", lpparam.classLoader)
+        for (method in clazz.declaredMethods) {
+            XposedBridge.log("Found method: ${method.name}")
+        }
 
         processSystemProps(prefs, lpparam)
     }
