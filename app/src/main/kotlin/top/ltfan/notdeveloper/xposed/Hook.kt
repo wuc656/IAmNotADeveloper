@@ -102,20 +102,20 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        XposedBridge.log("暫時修改 SDK_INT 為 32")
+                        Log.d("暫時修改 SDK_INT 為 32")
                     }
 
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", android.os.Build.VERSION.SDK_INT)
-                        XposedBridge.log("還原 SDK_INT")
+                        Log.d("還原 SDK_INT")
                     }
                 }
             )
         // Kotlin - 使用 LSPosed API
         val clazz = XposedHelpers.findClass("com.google.android.play.integrity", lpparam.classLoader)
         for (method in clazz.declaredMethods) {
-            XposedBridge.log("Found method: ${method.name}")
+            Log.d("找到 method: ${method.name}")
         }
 
         processSystemProps(prefs, lpparam)
