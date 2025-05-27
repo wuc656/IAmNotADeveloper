@@ -28,9 +28,9 @@ class Hook : IXposedHookLoadPackage {
             }
         }
         XposedHelpers.findAndHookMethod(
-            "com.google.android.play.core.integrity",
+            "com.google.android.play.core.integrity.IntegrityTokenRequest",
             lpparam.classLoader,
-            "IntegrityTokenRequest",
+            "requestIntegrityToken",
             String::class.java, // app package name?
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
