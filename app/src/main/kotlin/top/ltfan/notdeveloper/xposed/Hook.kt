@@ -27,9 +27,9 @@ class Hook : IXposedHookLoadPackage {
         }
 
         processSystemProps(prefs, lpparam)
-        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
-            return
-        }
+        //if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
+            //return
+        //}
 
         Log.d("processing package ${lpparam.packageName}")
 
