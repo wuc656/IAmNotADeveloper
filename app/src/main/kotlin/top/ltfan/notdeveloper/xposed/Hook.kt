@@ -103,14 +103,14 @@ class Hook : IXposedHookLoadPackage {
                         val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
                         sdkField.isAccessible = true
                         sdkField.set(null, 32)
-                        XposedBridge.log("暫時修改 SDK_INT 為 32")
+                        Log.d("暫時修改 SDK_INT 為 32")
                     }
 
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
                         sdkField.isAccessible = true
                         sdkField.set(null, android.os.Build.VERSION.SDK_INT)
-                        XposedBridge.log("還原 SDK_INT")
+                        Log.d("還原 SDK_INT")
                     }
                 }
             )
