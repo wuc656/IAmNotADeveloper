@@ -31,7 +31,7 @@ class Hook : IXposedHookLoadPackage {
             Log.d("IntegrityManager class 沒找到 ${lpparam.packageName}")
         }
         XposedHelpers.findAndHookMethod(
-            "com.google.android.play.core.integrity.IntegrityTokenRequest",
+            "com.google.android.play.core.integrity.IntegrityManager",
             lpparam.classLoader,
             "requestIntegrityToken",
             String::class.java, // app package name?
