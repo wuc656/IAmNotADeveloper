@@ -95,12 +95,13 @@ class Hook : IXposedHookLoadPackage {
         )
 
         XposedHelpers.findAndHookMethod(
-                "com.google.android.gms.integrity.IntegrityService",
-                lpparam.classLoader,
-                "getIntegrityToken",
-                String::class.java,
-                Executor::class.java,
-                Consumer::class.java,
+            "android.os.Binder",            // 對所有 Binder 傳輸進行攔截（也適用於 AIDL）
+            lpparam.classLoader,
+            "onTransact",
+            Int::class.javaPrimitiveType,   // code
+            android.os.Parcel::class.java,  // data
+            android.os.Parcel::class.java,  // reply
+            Int::class.javaPrimitiveType,   // flags
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
