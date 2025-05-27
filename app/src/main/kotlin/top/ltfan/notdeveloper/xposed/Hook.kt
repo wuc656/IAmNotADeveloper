@@ -93,15 +93,14 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             oldApiCallback,
         )
-
+        val targetClass = XposedHelpers.findClass(
+            "com.google.android.play", 
+            lpparam.classLoader
+        )
         XposedHelpers.findAndHookMethod(
-            "android.os.Binder",            // 對所有 Binder 傳輸進行攔截（也適用於 AIDL）
-            lpparam.classLoader,
-            "onTransact",
-            Int::class.javaPrimitiveType,   // code
-            android.os.Parcel::class.java,  // data
-            android.os.Parcel::class.java,  // reply
-            Int::class.javaPrimitiveType,   // flags
+            targetClass, 
+            "requestIntegrityToken",
+            String::class.java, // app package name?
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
