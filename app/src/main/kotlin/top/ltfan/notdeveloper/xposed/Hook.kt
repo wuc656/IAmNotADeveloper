@@ -15,7 +15,6 @@ import top.ltfan.notdeveloper.Item
 
 @Keep
 class Hook : IXposedHookLoadPackage {
-    private static final int FAKE_SDK_INT = 32;
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
@@ -92,32 +91,29 @@ class Hook : IXposedHookLoadPackage {
         )
 
         XposedHelpers.findAndHookMethod(
-            "com.google.android.gms.integrity.IntegrityService",
-            lpparam.classLoader,
-            "getIntegrityToken", // 呼叫點
-            String.class, // callerPackageName
-            Executor.class, // executor
-            Consumer.class, // callback
-            new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    Field sdkField = Build.VERSION.class.getDeclaredField("SDK_INT");
-                    sdkField.setAccessible(true);
-                    sdkField.set(null, FAKE_SDK_INT);
-                    XposedBridge.log("暫時修改 SDK_INT 為 " + FAKE_SDK_INT);
-                }
+                "com.google.android.gms.integrity.IntegrityService",
+                lpparam.classLoader,
+                "getIntegrityToken",
+                String::class.java,
+                Executor::class.java,
+                Consumer::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
+                        sdkField.isAccessible = true
+                        sdkField.set(null, 32)
+                        de.robv.android.xposed.XposedBridge.log("暫時修改 SDK_INT 為 32")
+                    }
 
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    // 還原 SDK_INT（預設是系統原值）
-                    Field sdkField = Build.VERSION.class.getDeclaredField("SDK_INT");
-                    sdkField.setAccessible(true);
-                    sdkField.set(null, android.os.Build.VERSION.SDK_INT); // 或抓一開始的備份
-                    XposedBridge.log("還原 SDK_INT");
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val sdkField: Field = android.os.Build.VERSION::class.java.getDeclaredField("SDK_INT")
+                        sdkField.isAccessible = true
+                        sdkField.set(null, android.os.Build.VERSION.SDK_INT)
+                        de.robv.android.xposed.XposedBridge.log("還原 SDK_INT")
+                    }
                 }
-            }
-        )
-        
+            )
+
         processSystemProps(prefs, lpparam)
     }
 
