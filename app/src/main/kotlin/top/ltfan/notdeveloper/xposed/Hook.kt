@@ -77,6 +77,7 @@ for (method in clazz2.declaredMethods) {
             "com.google.android.finsky.integrityservice.IntegrityService",
             lpparam.classLoader,
             "mm",
+            android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
@@ -95,6 +96,7 @@ for (method in clazz2.declaredMethods) {
             "com.google.android.finsky.integrityservice.BackgroundIntegrityService",
             lpparam.classLoader,
             "mm",
+            android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
