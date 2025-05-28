@@ -17,11 +17,11 @@ import top.ltfan.notdeveloper.Item
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
-        val clazz = XposedHelpers.findClass("com.google.android.finsky.activities.MainActivity", lpparam.classLoader)
-        clazz.methods.forEach {
-            XposedBridge.log("[Xposed] 方法: ${it.name}(${it.parameterTypes.joinToString()})")
-        }
         if (lpparam.packageName.startsWith("com.android.vending")) {
+            val cl1azz = XposedHelpers.findClass("com.google.android.finsky.activities.MainActivity", lpparam.classLoader)
+            cl1azz.methods.forEach {
+                XposedBridge.log("[Xposed] 方法: ${it.name}(${it.parameterTypes.joinToString()})")
+            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
