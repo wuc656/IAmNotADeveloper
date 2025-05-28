@@ -68,8 +68,8 @@ class Hook : IXposedHookLoadPackage {
 
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", android.os.Build.VERSION.SDK_INT)
-                        Log.d("還原 SDK_INT")
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                        Log.d("還原 SDK_INT 為 35")
                     }
                 }
         )
