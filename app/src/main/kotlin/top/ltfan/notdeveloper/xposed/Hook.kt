@@ -21,58 +21,9 @@ import kotlin.reflect.jvm.isAccessible
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
-        try {
-            val className = "com.google.android.finsky.integrityservice.IntegrityService"
-            val clazz = Class.forName(className, false, lpparam.classLoader)
-        for (method in clazz.declaredMethods) {
-           Log.d("找到 method: ${method.name}")
-        }
-        } catch (e: ClassNotFoundException) {
-        }
-        try {
-            val className = "com.google.android.finsky.integrityservice.BackgroundIntegrityService"
-            val clazz = Class.forName(className, false, lpparam.classLoader)
-        for (method in clazz.declaredMethods) {
-           Log.d("找到 method: ${method.name}")
-        }
-        } catch (e: ClassNotFoundException) {
-        }
-        val clazz1 = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
-
-for (method in clazz1.declaredMethods) {
-    val paramTypes = method.parameterTypes.joinToString(", ") { it.name }
-    Log.d("[Xposed] 方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
-}
-for (method in clazz1.declaredMethods) {
-    XposedBridge.hookMethod(method, object : XC_MethodHook() {
-        override fun beforeHookedMethod(param: MethodHookParam) {
-            val argsStr = param.args.joinToString { it?.toString() ?: "null" }
-            Log.d("[Xposed] ${method.name} 被呼叫，參數: $argsStr")
-        }
-
-        override fun afterHookedMethod(param: MethodHookParam) {
-            Log.d("[Xposed] ${method.name} 回傳: ${param.result}")
-        }
-    })
-}
- val clazz2 = XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService", lpparam.classLoader)
-
-for (method in clazz2.declaredMethods) {
-    val paramTypes = method.parameterTypes.joinToString(", ") { it.name }
-   Log.d("[Xposed] 方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
-}
-for (method in clazz2.declaredMethods) {
-    XposedBridge.hookMethod(method, object : XC_MethodHook() {
-        override fun beforeHookedMethod(param: MethodHookParam) {
-            val argsStr = param.args.joinToString { it?.toString() ?: "null" }
-            Log.d("[Xposed] ${method.name} 被呼叫，參數: $argsStr")
-        }
-
-        override fun afterHookedMethod(param: MethodHookParam) {
-            Log.d("[Xposed] ${method.name} 回傳: ${param.result}")
-        }
-    })
-}
+        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+        Log.d("暫時修改 SDK_INT 為 32")
         XposedHelpers.findAndHookMethod(
             "com.google.android.finsky.integrityservice.IntegrityService",
             lpparam.classLoader,
