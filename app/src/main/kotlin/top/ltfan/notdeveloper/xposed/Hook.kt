@@ -84,11 +84,11 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             )
-            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-            Log.i("暫時修改 SDK_INT 為 32")
+            //val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+            //XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+            //Log.i("暫時修改 SDK_INT 為 32")
         }
-        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android") && !lpparam.packageName.startsWith("com.android.vending")) {
+        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
         //Log.i("processing package ${lpparam.packageName}")
