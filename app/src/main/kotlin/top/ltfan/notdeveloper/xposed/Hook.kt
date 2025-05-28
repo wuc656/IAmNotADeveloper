@@ -25,16 +25,13 @@ class Hook : IXposedHookLoadPackage {
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        Log.d("參數: ${param}")
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                         Log.d("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        Log.d("參數result: ${param.result}")
-                        val result = param.result
                         Thread {
-                            Thread.sleep(10) // 確保 caller thread 已經繼續
+                            Thread.sleep(5000) // 確保 caller thread 已經繼續
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.d("還原 SDK_INT 為 35")
@@ -49,16 +46,13 @@ class Hook : IXposedHookLoadPackage {
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        Log.d("參數: ${param}")
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                         Log.d("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        Log.d("參數result: ${param.result}")
-                        val result = param.result
                         Thread {
-                            Thread.sleep(10) // 確保 caller thread 已經繼續
+                            Thread.sleep(5000) // 確保 caller thread 已經繼續
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.d("還原 SDK_INT 為 35")
