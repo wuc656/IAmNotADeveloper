@@ -63,24 +63,24 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.activities.MainActivity",
                 lpparam.classLoader,
-                "onResume",
+                "onStart",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                        Log.d("使用者進入 Google Play（onResume）→ SDK_INT 設為 35")
+                        Log.d("使用者進入 Google Play（onStart）→ SDK_INT 設為 35")
                     }
                 }
             )
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.activities.MainActivity",
                 lpparam.classLoader,
-                "onPause",
+                "onStop",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        Log.d("使用者離開 Google Play（onPause）→ SDK_INT 改回 32")
+                        Log.d("使用者離開 Google Play（onStop）→ SDK_INT 改回 32")
                     }
                 }
             )
