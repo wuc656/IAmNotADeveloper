@@ -32,9 +32,12 @@ class Hook : IXposedHookLoadPackage {
                         Log.i("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                        Log.i("還原 SDK_INT 為 35")
+                        Thread {
+                            Thread.sleep(3000) // 確保 caller thread 已經繼續
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                            Log.i("還原 SDK_INT 為 35")
+                        }.start()
                     }
                 }
             )
@@ -50,9 +53,12 @@ class Hook : IXposedHookLoadPackage {
                         Log.i("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                        Log.i("還原 SDK_INT 為 35")
+                        Thread {
+                            Thread.sleep(3000) // 確保 caller thread 已經繼續
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                            Log.i("還原 SDK_INT 為 35")
+                        }.start()
                     }
                 }
             )
