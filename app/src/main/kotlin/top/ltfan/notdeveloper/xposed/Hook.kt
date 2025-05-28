@@ -12,18 +12,12 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.Item
-import java.util.concurrent.Executor
-import java.util.function.Consumer
-import java.lang.reflect.Field
-import kotlin.reflect.jvm.isAccessible
 
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
-        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-        Log.d("暫時修改 SDK_INT 為 32")
+        if (lpparam.packageName.startsWith("com.android.vending")) {
         XposedHelpers.findAndHookMethod(
             "com.google.android.finsky.integrityservice.IntegrityService",
             lpparam.classLoader,
@@ -62,10 +56,13 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
         )
+        }
+        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+        Log.d("暫時修改 SDK_INT 為 32")
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
-
         //Log.d("processing package ${lpparam.packageName}")
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
