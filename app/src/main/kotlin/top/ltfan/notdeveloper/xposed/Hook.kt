@@ -13,6 +13,8 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.Item
 
+import android.app.Activity
+
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
