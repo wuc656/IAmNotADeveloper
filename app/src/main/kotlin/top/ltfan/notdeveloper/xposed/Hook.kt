@@ -13,16 +13,9 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.Item
 
-import dalvik.system.DexFile
-
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        DexFile(lpparam.appInfo.sourceDir).entries().toList().forEach { className ->
-    if (className.contains("Activity")) {
-       Log.d("[Xposed] Activity: $className")
-    }
-}
         Log.d("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
             XposedHelpers.findAndHookMethod(
@@ -68,7 +61,7 @@ class Hook : IXposedHookLoadPackage {
                 }
             )
             XposedHelpers.findAndHookMethod(
-                "com.android.vending.AssetBrowserActivity", // 主要 UI activity
+                "com.google.android.finsky.activities.MainActivity",
                 lpparam.classLoader,
                 "onResume",
                 object : XC_MethodHook() {
@@ -80,7 +73,7 @@ class Hook : IXposedHookLoadPackage {
                 }
             )
             XposedHelpers.findAndHookMethod(
-                "com.android.vending.AssetBrowserActivity",
+                "com.google.android.finsky.activities.MainActivity",
                 lpparam.classLoader,
                 "onPause",
                 object : XC_MethodHook() {
