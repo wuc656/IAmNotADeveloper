@@ -13,9 +13,16 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.Item
 
+import dalvik.system.DexFile
+
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
+        DexFile(lpparam.appInfo.sourceDir).entries().toList().forEach { className ->
+    if (className.contains("Activity")) {
+       Log.d("[Xposed] Activity: $className")
+    }
+}
         Log.d("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
             XposedHelpers.findAndHookMethod(
