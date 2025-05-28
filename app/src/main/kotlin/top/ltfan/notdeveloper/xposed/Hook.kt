@@ -37,20 +37,31 @@ class Hook : IXposedHookLoadPackage {
         }
         } catch (e: ClassNotFoundException) {
         }
-        val clazz = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
+        val clazz1 = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
 
-for (method in clazz.declaredMethods) {
+for (method in clazz1.declaredMethods) {
     val paramTypes = method.parameterTypes.joinToString(", ") { it.name }
     Log.d("[Xposed] 方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
 }
+for (method in clazz1.declaredMethods) {
+    XposedBridge.hookMethod(method, object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val argsStr = param.args.joinToString { it?.toString() ?: "null" }
+            Log.d("[Xposed] ${method.name} 被呼叫，參數: $argsStr")
+        }
 
- val clazz = XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService", lpparam.classLoader)
+        override fun afterHookedMethod(param: MethodHookParam) {
+            Log.d("[Xposed] ${method.name} 回傳: ${param.result}")
+        }
+    })
+}
+ val clazz2 = XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService", lpparam.classLoader)
 
-for (method in clazz.declaredMethods) {
+for (method in clazz2.declaredMethods) {
     val paramTypes = method.parameterTypes.joinToString(", ") { it.name }
    Log.d("[Xposed] 方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
 }
-for (method in clazz.declaredMethods) {
+for (method in clazz2.declaredMethods) {
     XposedBridge.hookMethod(method, object : XC_MethodHook() {
         override fun beforeHookedMethod(param: MethodHookParam) {
             val argsStr = param.args.joinToString { it?.toString() ?: "null" }
