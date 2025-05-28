@@ -63,8 +63,10 @@ class Hook : IXposedHookLoadPackage {
                 }
             )
             XposedHelpers.findAndHookMethod(
-                android.app.Activity::class.java,
-                "onStart",
+                "android.app.Activity",
+                lpparam.classLoader,
+                "onCreate",
+                "android.os.Bundle",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val activity = param.thisObject as Activity
