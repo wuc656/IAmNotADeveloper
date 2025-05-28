@@ -29,14 +29,14 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        Log.i("暫時修改 SDK_INT 為 32")
+                        Log.i("IntegrityService 暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
                         Thread {
                             Thread.sleep(3000) // 確保 caller thread 已經繼續
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                            Log.i("還原 SDK_INT 為 35")
+                            Log.i("IntegrityService 還原 SDK_INT 為 35")
                         }.start()
                     }
                 }
@@ -50,14 +50,14 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        Log.i("暫時修改 SDK_INT 為 32")
+                        Log.i("BackgroundIntegrityService 暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
                         Thread {
                             Thread.sleep(3000) // 確保 caller thread 已經繼續
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                            Log.i("還原 SDK_INT 為 35")
+                            Log.i("BackgroundIntegrityService 還原 SDK_INT 為 35")
                         }.start()
                     }
                 }
@@ -90,9 +90,9 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             )
-            //val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-            //XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-            //Log.i("暫時修改 SDK_INT 為 32")
+            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+            Log.i("暫時修改 SDK_INT 為 32")
         }
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
