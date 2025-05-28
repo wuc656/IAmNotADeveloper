@@ -18,10 +18,6 @@ class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
-            val cl1azz = XposedHelpers.findClass("com.google.android.finsky.activities.MainActivity", lpparam.classLoader)
-            cl1azz.methods.forEach {
-                XposedBridge.log("[Xposed] 方法: ${it.name}(${it.parameterTypes.joinToString()})")
-            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
@@ -65,26 +61,30 @@ class Hook : IXposedHookLoadPackage {
                 }
             )
             XposedHelpers.findAndHookMethod(
-                "com.google.android.finsky.activities.MainActivity",
-                lpparam.classLoader,
-                "onResume",
+                android.app.Activity::class.java,
+                "onStart",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                        Log.d("使用者進入 Google Play（onResume）→ SDK_INT 設為 35")
+                        val activity = param.thisObject as Activity
+                        if (activity.packageName == "com.android.vending") {
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                            Log.d("使用者進入 Google Play（onResume）→ SDK_INT 設為 35")
+                        }
                     }
                 }
             )
             XposedHelpers.findAndHookMethod(
-                "com.google.android.finsky.activities.MainActivity",
-                lpparam.classLoader,
-                "onPause",
+                android.app.Activity::class.java,
+                "onStop",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        Log.d("使用者離開 Google Play（onPause）→ SDK_INT 改回 32")
+                        val activity = param.thisObject as Activity
+                        if (activity.packageName == "com.android.vending") {
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                            Log.d("使用者離開 Google Play（onPause）→ SDK_INT 改回 32")
+                        }
                     }
                 }
             )
