@@ -21,15 +21,6 @@ import kotlin.reflect.jvm.isAccessible
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.d("開啟: ${lpparam.packageName}")
-        val clsName = "com.google.android.finsky.integrityservice.IntegrityService"
-try {
-    val clazz = XposedHelpers.findClass(clsName, lpparam.classLoader)
-    clazz.declaredMethods.forEach {
-        Log.d("[Xposed] $clsName method: ${it.name}(${it.parameterTypes.joinToString()})")
-    }
-} catch (e: Throwable) {
-    Log.d("[Xposed] 找不到類別 $clsName: ${e.message}")
-}
         try {
             val className = "com.google.android.finsky.integrityservice.IntegrityService"
             val clazz = Class.forName(className, false, lpparam.classLoader)
@@ -49,7 +40,7 @@ try {
         XposedHelpers.findAndHookMethod(
             "com.google.android.finsky.integrityservice.IntegrityService",
             lpparam.classLoader,
-            "onCreate",
+            "mm",
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
@@ -67,7 +58,7 @@ try {
         XposedHelpers.findAndHookMethod(
             "com.google.android.finsky.integrityservice.BackgroundIntegrityService",
             lpparam.classLoader,
-            "onCreate",
+            "mm",
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
