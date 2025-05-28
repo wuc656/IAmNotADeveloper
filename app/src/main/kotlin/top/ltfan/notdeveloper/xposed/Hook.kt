@@ -84,6 +84,27 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             )
+            try {
+                val clazz = XposedHelpers.findClass("com.google.android.finsky.activities.MainActivity", lpparam.classLoader)
+                // hook 繼承來的 onStart()
+                XposedBridge.hookAllMethods(clazz, "onStart", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                        Log.d("[Xposed] MainActivity → onStart → SDK_INT = 35")
+                    }
+                })
+                // hook 繼承來的 onStop()
+                XposedBridge.hookAllMethods(clazz, "onStop", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                        Log.d("[Xposed] MainActivity → onStop → SDK_INT = 32")
+                    }
+                })
+            } catch (e: Throwable) {
+                Log.d("❌ hook MainActivity lifecycle 失敗: ${e.message}")
+            }
             //val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
             //XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
             //Log.d("暫時修改 SDK_INT 為 32")
