@@ -20,6 +20,7 @@ import android.app.Activity
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
+        ActivityManager am = (ActivityManager) Context.getSystemService(Context.ACTIVITY_SERVICE);
         Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
             XposedHelpers.findAndHookMethod(
@@ -29,8 +30,7 @@ class Hook : IXposedHookLoadPackage {
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                        activityManager.forceStopPackage("com.android.vending")
+                        XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                         Log.i("暫時修改 SDK_INT 為 32")
@@ -41,8 +41,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("還原 SDK_INT 為 35")
-                            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                            activityManager.forceStopPackage("com.android.vending")
+                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
                         }.start()
                     }
                 }
@@ -66,8 +65,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("Background 還原 SDK_INT 為 35")
-                            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                            activityManager.forceStopPackage("com.android.vending")
+                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
                         }.start()
                     }
                 }
@@ -81,8 +79,7 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val activity = param.thisObject as Activity
                         if (activity.packageName == "com.android.vending") {
-                            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                            activityManager.forceStopPackage("com.android.vending")
+                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("使用者進入 Google Play SDK_INT 設為 35")
@@ -100,8 +97,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                             Log.i("使用者離開 Google Play SDK_INT 改回 32")
-                            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                            activityManager.forceStopPackage("com.android.vending")
+                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
                         }
                     }
                 }
