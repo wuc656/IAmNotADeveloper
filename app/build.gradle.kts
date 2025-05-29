@@ -75,7 +75,6 @@ dependencies {
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.activity.compose)
-    implementation(libs.core.ktx) // 新增 core-ktx
 
     val compose = platform(libs.compose)
     implementation(compose)

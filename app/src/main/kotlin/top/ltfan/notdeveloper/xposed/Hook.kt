@@ -13,8 +13,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.Item
 
-import android.app.ActivityManager
-import android.content.Context
+import java.lang.Runtime
 import android.app.Activity
 
 @Keep
@@ -41,8 +40,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("還原 SDK_INT 為 35")
-                            am = (ActivityManager) param.thisObject;
-                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }.start()
                     }
                 }
@@ -66,8 +64,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("Background 還原 SDK_INT 為 35")
-                            am = (ActivityManager) param.thisObject;
-                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }.start()
                     }
                 }
@@ -81,8 +78,7 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val activity = param.thisObject as Activity
                         if (activity.packageName == "com.android.vending") {
-                            am = (ActivityManager) param.thisObject;
-                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("使用者進入 Google Play SDK_INT 設為 35")
@@ -100,8 +96,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                             Log.i("使用者離開 Google Play SDK_INT 改回 32")
-                            am = (ActivityManager) param.thisObject;
-                            XposedHelpers.callMethod(am, "forceStopPackage", "com.android.vending");
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }
                     }
                 }
