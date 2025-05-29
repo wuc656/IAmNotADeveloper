@@ -36,6 +36,7 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                        SdkState.currentSdkInt = 32
                         Log.i("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
@@ -43,6 +44,7 @@ class Hook : IXposedHookLoadPackage {
                             Thread.sleep(3000) // 確保 caller thread 已經繼續
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                            SdkState.currentSdkInt = 35
                             Log.i("還原 SDK_INT 為 35")
                             Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }.start()
