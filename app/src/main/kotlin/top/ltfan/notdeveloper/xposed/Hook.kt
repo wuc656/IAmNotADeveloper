@@ -28,10 +28,11 @@ class Hook : IXposedHookLoadPackage {
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
+                        Runtime.getRuntime().exec(arrayOf("su", "-c", "pm disable com.android.vending/com.google.android.finsky.integrityservice.IntegrityService"))
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                         Log.i("暫時修改 SDK_INT 為 32")
+                        Runtime.getRuntime().exec(arrayOf("su", "-c", "pm enable com.android.vending/com.google.android.finsky.integrityservice.IntegrityService"))
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
                         Thread {
@@ -51,10 +52,11 @@ class Hook : IXposedHookLoadPackage {
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
+                        Runtime.getRuntime().exec(arrayOf("su", "-c", "pm disable com.android.vending/com.google.android.finsky.integrityservice.BackgroundIntegrityService"))
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                         Log.i("Background 修改 SDK_INT 為 32")
+                        Runtime.getRuntime().exec(arrayOf("su", "-c", "pm enable com.android.vending/com.google.android.finsky.integrityservice.BackgroundIntegrityService"))
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
                         Thread {
