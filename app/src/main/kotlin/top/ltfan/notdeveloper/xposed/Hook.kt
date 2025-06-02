@@ -73,7 +73,7 @@ class Hook : IXposedHookLoadPackage {
                 "找到: ${method.toGenericString()} 的 ${method.name}"
             }
             Log.i("嘗試動態讀取 BackgroundIntegrityService")
-            val targetClass1 =XposedHelpers.findClass("com.google.android.finsky.BackgroundIntegrityService.IntegrityService",                            lpparam.classLoader                    )
+            val targetClass1 =XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService",                            lpparam.classLoader                    )
             // 定義目標方法的簽名特徵
             val expectedReturnType1 = IBinder::class.java
             val expectedParamTypes1 = arrayOf(Intent::class.java) // Kotlin 陣列
@@ -104,28 +104,31 @@ class Hook : IXposedHookLoadPackage {
                 )
             }
             when {
-                    candidateMethods.size >= 1 -> {
-                        val methodToHook = candidateMethods[0]
-                        val foundMethodName = methodToHook.name // 動態獲取到的方法名
-                        Log.i("IAmNotADeveloper: Dynamically found method to hook: $foundMethodName")
-
-                        // 使用獲取到的 Method 物件進行 Hook
-                        XposedBridge.hookMethod(methodToHook, object : XC_MethodHook() {
-                            override fun beforeHookedMethod(param: MethodHookParam) {
-                                val intent = param.args[0] as Intent // 類型轉換
-                                Log.i("IAmNotADeveloper: [$foundMethodName] Hooked before! Intent: $intent")
-                                // 在這裡可以添加你的邏輯
-                                // 例如：intent.putExtra("hooked_by_dynamic_finder", true)
-                            }
-
-                            override fun afterHookedMethod(param: MethodHookParam) {
-                                val binder = param.result as IBinder? // 結果可能為 null，使用安全轉換
-                                Log.i("IAmNotADeveloper: [$foundMethodName] Hooked after! IBinder: $binder")
-                                // 在這裡可以添加你的邏輯
-                            }
-                        })
-                        Log.i("成功hook $foundMethodName")
-                    }
+                candidateMethods.size >= 1 -> {
+                    val methodToHook = candidateMethods[0]
+                    val foundMethodName = methodToHook.name // 動態獲取到的方法名
+                    Log.i("IAmNotADeveloper: Dynamically found method to hook: $foundMethodName")
+                    // 使用獲取到的 Method 物件進行 Hook
+                    XposedBridge.hookMethod(methodToHook, object : XC_MethodHook() {
+                        override fun beforeHookedMethod(param: MethodHookParam) {
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                            SdkState.currentSdkInt = 32
+                            Log.i("暫時修改 SDK_INT 為 32")
+                        }
+                        override fun afterHookedMethod(param: MethodHookParam) {
+                            Thread {
+                                Thread.sleep(3000) // 確保 caller thread 已經繼續
+                                val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                                XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
+                                SdkState.currentSdkInt = 35
+                                Log.i("還原 SDK_INT 為 35")
+                                Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
+                            }.start()
+                        }
+                    })
+                    Log.i("成功hook $foundMethodName")
+                }
             }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
@@ -213,6 +216,18 @@ class Hook : IXposedHookLoadPackage {
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
         if (lpparam.packageName.startsWith("com.google.android.gms")) {
+            try {
+            val clazz = XposedHelpers.findClass(
+                "com.google.android.gms.integrity.service.IntegrityService",
+                lpparam.classLoader
+            )
+            clazz.declaredMethods.forEach { method ->
+                val paramTypes = method.parameterTypes.joinToString { it.name }
+                Log.i("方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
+            }
+        } catch (e: Throwable) {
+            Log.i("❌ IntegrityService not found: ${e.message}")
+        }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.play.core.integrity.IntegrityManagerImpl",
                 lpparam.classLoader,
