@@ -119,7 +119,7 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             ) */
-            /* XposedHelpers.findAndHookMethod(
+            XposedHelpers.findAndHookMethod(
                 "android.app.Activity",
                 lpparam.classLoader,
                 "onCreate",
@@ -138,7 +138,7 @@ class Hook : IXposedHookLoadPackage {
                         }
                     }
                 }
-            ) */
+            )
             /* XposedHelpers.findAndHookMethod(
                 android.app.Activity::class.java,
                 "onStop",
