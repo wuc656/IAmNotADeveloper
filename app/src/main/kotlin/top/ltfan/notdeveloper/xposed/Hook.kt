@@ -24,93 +24,89 @@ object SdkState {
 
 @Keep
 class Hook : IXposedHookLoadPackage {
-    private static final String TARGET_PACKAGE_NAME = "com.android.vending"; // Google Play 商店包名
-    private static final String TARGET_CLASS_NAME = "com.google.android.finsky.integrityservice.IntegrityService";
+    // 將這些常量定義在類級別或者 companion object 中
+    companion object {
+        private const val TARGET_PACKAGE_NAME = "com.android.vending" // Google Play 商店包名
+        private const val TARGET_CLASS_NAME = "com.google.android.finsky.integrityservice.BackgroundIntegrityService"
+    }
     Log.i("Attempting to dynamically hook method in " + TARGET_CLASS_NAME);
         try {
-            Class<?> targetClass = XposedHelpers.findClass(TARGET_CLASS_NAME, lpparam.classLoader);
+            val targetClass = XposedHelpers.findClass(TARGET_CLASS_NAME, lpparam.classLoader)
 
             // 定義目標方法的簽名特徵
-            Class<?> expectedReturnType = IBinder.class;
-            Class<?>[] expectedParamTypes = new Class<?>[]{Intent.class};
-            List<Method> candidateMethods = new ArrayList<>();
+            val expectedReturnType = IBinder::class.java
+            val expectedParamTypes = arrayOf(Intent::class.java) // Kotlin 陣列
+            val candidateMethods = mutableListOf<Method>() // Kotlin 可變列表
 
-            // 遍歷類的所有聲明方法 (包括 public, protected, private, package-private)
-            for (Method method : targetClass.getDeclaredMethods()) {
+            // 遍歷類的所有聲明方法
+            for (method in targetClass.declaredMethods) {
                 // 1. 檢查返回類型
-                if (!method.getReturnType().equals(expectedReturnType)) {
-                    continue;
+                if (method.returnType != expectedReturnType) {
+                    continue
                 }
 
                 // 2. 檢查參數類型和數量
-                if (!Arrays.equals(method.getParameterTypes(), expectedParamTypes)) {
-                    continue;
+                // 在 Kotlin 中比較陣列內容使用 contentEquals
+                if (!method.parameterTypes.contentEquals(expectedParamTypes)) {
+                    continue
                 }
 
                 // 3. 檢查修飾符 (可選，但更精確)
-                int modifiers = method.getModifiers();
+                val modifiers = method.modifiers
                 if (!Modifier.isPublic(modifiers)) { // 必須是 public
-                    continue;
+                    continue
                 }
                 if (!Modifier.isFinal(modifiers)) { // 必須是 final
                     // 如果 final 不是絕對必要條件，可以註解掉這行檢查
-                    continue;
+                    continue
                 }
 
                 // 如果所有條件都符合，則將此方法視為候選方法
-                candidateMethods.add(method);
-                Log.i("Found potential method: " + method.getName() +
-                        " with signature " + method.toGenericString());
+                candidateMethods.add(method)
+                Log.i("IAmNotADeveloper: Found potential method: ${method.name} with signature ${method.toGenericString()}")
             }
 
-            if (candidateMethods.size() == 1) {
-                Method methodToHook = candidateMethods.get(0);
-                String foundMethodName = methodToHook.getName(); // 動態獲取到的方法名
-                Log.i("Dynamically found method to hook: " + foundMethodName);
+            when {
+                candidateMethods.size == 1 -> {
+                    val methodToHook = candidateMethods[0]
+                    val foundMethodName = methodToHook.name // 動態獲取到的方法名
+                    Log.i("IAmNotADeveloper: Dynamically found method to hook: $foundMethodName")
 
-                // 使用獲取到的 Method 物件進行 Hook
-                XposedBridge.hookMethod(methodToHook, new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                        Intent intent = (Intent) param.args[0];
-                        Log.i("[" + foundMethodName + "] Hooked before! Intent: " + intent);
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        SdkState.currentSdkInt = 32
-                        Log.i("暫時修改 SDK_INT 為 32")
+                    // 使用獲取到的 Method 物件進行 Hook
+                    XposedBridge.hookMethod(methodToHook, object : XC_MethodHook() {
+                        override fun beforeHookedMethod(param: MethodHookParam) {
+                            val intent = param.args[0] as Intent // 類型轉換
+                            Log.i("IAmNotADeveloper: [$foundMethodName] Hooked before! Intent: $intent")
+                            // 在這裡可以添加你的邏輯
+                            // 例如：intent.putExtra("hooked_by_dynamic_finder", true)
+                        }
+
+                        override fun afterHookedMethod(param: MethodHookParam) {
+                            val binder = param.result as IBinder? // 結果可能為 null，使用安全轉換
+                            Log.i("IAmNotADeveloper: [$foundMethodName] Hooked after! IBinder: $binder")
+                            // 在這裡可以添加你的邏輯
+                        }
+                    })
+                    Log.i("IAmNotADeveloper: Successfully hooked $TARGET_CLASS_NAME.$foundMethodName")
+
+                }
+                candidateMethods.isEmpty() -> {
+                    Log.i("IAmNotADeveloper: Error: No method found matching the signature in $TARGET_CLASS_NAME")
+                }
+                else -> {
+                    Log.i("IAmNotADeveloper: Error: Multiple methods found matching the signature in $TARGET_CLASS_NAME. Needs further refinement.")
+                    for (m in candidateMethods) {
+                        Log.i("  - Candidate: ${m.name} (${m.toGenericString()})")
                     }
-
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        IBinder binder = (IBinder) param.getResult();
-                        Log.i("[" + foundMethodName + "] Hooked after! IBinder: " + binder);
-                        Thread {
-                            Thread.sleep(3000) // 確保 caller thread 已經繼續
-                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                            SdkState.currentSdkInt = 35
-                            Log.i("還原 SDK_INT 為 35")
-                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
-                        }.start()
-                    }
-                });
-                Log.i("Successfully hooked " + TARGET_CLASS_NAME + "." + foundMethodName);
-
-            } else if (candidateMethods.isEmpty()) {
-                Log.i("Error: No method found matching the signature in " + TARGET_CLASS_NAME);
-            } else {
-                Log.i("Error: Multiple methods found matching the signature in " + TARGET_CLASS_NAME + ". Needs further refinement.");
-                for (Method m : candidateMethods) {
-                    Log.i("  - Candidate: " + m.getName() + " (" + m.toGenericString() + ")");
                 }
             }
 
-        } catch (XposedHelpers.ClassNotFoundError e) {
-            Log.i("Error: Target class " + TARGET_CLASS_NAME + " not found.");
-            Log.i(e);
-        } catch (Throwable t) {
-            Log.i("An unexpected error occurred during dynamic hook setup.");
-            Log.i(t);
+        } catch (e: XposedHelpers.ClassNotFoundError) {
+            Log.i("IAmNotADeveloper: Error: Target class $TARGET_CLASS_NAME not found.")
+            Log.i(e) // XposedBridge 可以直接記錄 Throwable
+        } catch (t: Throwable) { // 捕獲所有其他異常
+            Log.i("IAmNotADeveloper: An unexpected error occurred during dynamic hook setup.")
+            Log.i(t)
         }
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.i("開啟: ${lpparam.packageName}")
