@@ -30,7 +30,7 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
-                "mm",
+                "ml",
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
@@ -54,7 +54,7 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.BackgroundIntegrityService",
                 lpparam.classLoader,
-                "mm",
+                "ml",
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
