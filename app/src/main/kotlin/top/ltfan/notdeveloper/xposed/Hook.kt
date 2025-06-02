@@ -129,6 +129,25 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", SdkState.currentSdkInt) // 重新設定SDK_INT
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
+        if (lpparam.packageName.startsWith("com.google.android.gms")) {
+            XposedHelpers.findAndHookMethod(
+                "com.google.android.play.core.integrity.IntegrityManagerImpl",
+                lpparam.classLoader,
+                "requestIntegrityToken",
+                String::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val sdkInt = Build.VERSION.SDK_INT
+                        val requestParam = param.args[0] as String
+                        Log.i("SDK_INT: $sdkInt, 請求 Param: $requestParam")
+                    }
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val result = param.result
+                        Log.i("請求: $result")
+                    }
+                }
+            )
+        }
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
