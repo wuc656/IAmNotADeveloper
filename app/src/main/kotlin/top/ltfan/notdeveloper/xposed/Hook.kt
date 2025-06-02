@@ -34,7 +34,7 @@ class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         //Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
-            val targetClass = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
+            /* val targetClass = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
             val expectedReturnType = IBinder::class.java
             val expectedParamTypes = arrayOf(Intent::class.java) // Kotlin 陣列
             val candidateMethods = mutableListOf<Method>() // Kotlin 可變列表
@@ -118,8 +118,8 @@ class Hook : IXposedHookLoadPackage {
                         }.start()
                     }
                 }
-            )
-            XposedHelpers.findAndHookMethod(
+            ) */
+            /* XposedHelpers.findAndHookMethod(
                 "android.app.Activity",
                 lpparam.classLoader,
                 "onCreate",
@@ -138,7 +138,7 @@ class Hook : IXposedHookLoadPackage {
                         }
                     }
                 }
-            )
+            ) */
             /* XposedHelpers.findAndHookMethod(
                 android.app.Activity::class.java,
                 "onStop",
