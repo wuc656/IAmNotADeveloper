@@ -39,13 +39,12 @@ class Hook : IXposedHookLoadPackage {
     // 將這些常量定義在類級別或者 companion object 中
     companion object {
         private const val TARGET_PACKAGE_NAME = "com.android.vending" // Google Play 商店包名
-        private const val TARGET_CLASS_NAME = "com.google.android.finsky.integrityservice.BackgroundIntegrityService"
+        private const val TARGET_CLASS_NAME = "com.google.android.finsky.integrityservice.IntegrityService"
     }
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
             Log.i("Attempting to dynamically hook method in " + TARGET_CLASS_NAME);
-            try {
                 val targetClass = XposedHelpers.findClass(TARGET_CLASS_NAME, lpparam.classLoader)
 
                 // 定義目標方法的簽名特徵
@@ -115,10 +114,6 @@ class Hook : IXposedHookLoadPackage {
                         }
                     }
                 }
-
-            } catch (e) {
-                Log.i(e) // 將 Throwable 轉換為堆疊追蹤字串
-            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
