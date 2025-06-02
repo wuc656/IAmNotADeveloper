@@ -160,7 +160,7 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", SdkState.currentSdkInt) // 重新設定SDK_INT
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
-        if (!lpparam.packageName.startsWith("com.android.vending")) {
+        if (!lpparam.packageName.startsWith("com.android.vending")&&!lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
                 "com.google.android.play.core.integrity.IntegrityManagerImpl",
                 lpparam.classLoader,
