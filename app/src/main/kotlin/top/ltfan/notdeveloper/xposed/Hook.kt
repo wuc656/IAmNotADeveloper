@@ -35,7 +35,6 @@ class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
-            Log.i("嘗試動態讀取 IntegrityService");
             val targetClass = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
             val expectedReturnType = IBinder::class.java
             val expectedParamTypes = arrayOf(Intent::class.java) // Kotlin 陣列
@@ -54,6 +53,8 @@ class Hook : IXposedHookLoadPackage {
                 if (!Modifier.isFinal(modifiers)) {
                     continue
                 }
+                Log.i("動態讀取到了 IntegrityService");
+                candidateMethods.add(method)
             }
             Log.i("嘗試動態讀取 BackgroundIntegrityService")
             val targetClass1 =XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService",lpparam.classLoader)
@@ -71,6 +72,7 @@ class Hook : IXposedHookLoadPackage {
                 if (!Modifier.isFinal(modifiers)) {
                     continue
                 }
+                Log.i("動態讀取到了 BackgroundIntegrityService")
                 candidateMethods.add(method)
             }
             XposedHelpers.findAndHookMethod(
