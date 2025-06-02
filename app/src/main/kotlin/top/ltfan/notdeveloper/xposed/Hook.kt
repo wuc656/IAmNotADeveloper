@@ -19,11 +19,6 @@ import android.app.Activity
 // 必要的導入語句
 import android.content.Intent
 import android.os.IBinder
-//import de.robv.android.xposed.IXposedHookLoadPackage
-//import de.robv.android.xposed.XC_MethodHook
-//import de.robv.android.xposed.XposedBridge
-//import de.robv.android.xposed.XposedHelpers
-//import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam // 確保 LoadPackageParam 被正確導入
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
@@ -37,10 +32,6 @@ object SdkState {
 
 @Keep
 class Hook : IXposedHookLoadPackage {
-    // 將這些常量定義在類級別或者 companion object 中
-    companion object {
-        private const val TARGET_PACKAGE_NAME = "com.android.vending" // Google Play 商店包名
-    }
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
@@ -82,48 +73,20 @@ class Hook : IXposedHookLoadPackage {
                 }
                 candidateMethods.add(method)
             }
-            when {
-                candidateMethods.size >= 1 -> {
-                    for (methodToHook in candidateMethods) {
-                        val foundMethodName = methodToHook.name // 動態獲取到的方法名
-                        Log.i("動態 hook: $foundMethodName")
-                        // 使用獲取到的 Method 物件進行 Hook
-                        XposedBridge.hookMethod(methodToHook, object : XC_MethodHook() {
-                            override fun beforeHookedMethod(param: MethodHookParam) {
-                                if (SdkState.currentSdkInt != 32) {
-                                    Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
-                                    val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                                    XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                                    SdkState.currentSdkInt = 32
-                                    Log.i("暫時修改 SDK_INT 為 32")
-                                }
-                            }
-                            override fun afterHookedMethod(param: MethodHookParam) {
-                                Thread {
-                                    Thread.sleep(3000) // 確保 caller thread 已經繼續
-                                    val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                                    XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                                    SdkState.currentSdkInt = 35
-                                    Log.i("還原 SDK_INT 為 35")
-                                    Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
-                                }.start()
-                            }
-                        })
-                        Log.i("成功hook $foundMethodName")
-                    }
-                }
-            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
-                "ml",
+                candidateMethods[0].name,
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        SdkState.currentSdkInt = 32
-                        Log.i("暫時修改 SDK_INT 為 32")
+                        if (SdkState.currentSdkInt != 32) {
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                            SdkState.currentSdkInt = 32
+                            Log.i("暫時修改 SDK_INT 為 32")
+                        }
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
                         Thread {
@@ -140,14 +103,17 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.BackgroundIntegrityService",
                 lpparam.classLoader,
-                "ml",
+                candidateMethods[1].name,
                 android.content.Intent::class.java,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                        XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        SdkState.currentSdkInt = 32
-                        Log.i("Background 修改 SDK_INT 為 32")
+                        if (SdkState.currentSdkInt != 32) {
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
+                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                            SdkState.currentSdkInt = 32
+                            Log.i("暫時修改 SDK_INT 為 32")
+                        }
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
                         Thread {
@@ -199,28 +165,6 @@ class Hook : IXposedHookLoadPackage {
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
         /* if (lpparam.packageName.startsWith("com.google.android.gms")) {
-             try {
-            val dexFile = DexFile(lpparam.appInfo.sourceDir)
-            val entries = dexFile.entries()
-            while (entries.hasMoreElements()) {
-                val className = entries.nextElement()
-                    Log.i("找到類: $className")
-            }
-            } catch (e: Throwable) {
-                Log.i("❌ DexFile 錯誤: ${e.message}")
-            }
-            try {
-            val clazz = XposedHelpers.findClass(
-                "com.google.android.play.core.integrity",
-                lpparam.classLoader
-            )
-            clazz.declaredMethods.forEach { method ->
-                val paramTypes = method.parameterTypes.joinToString { it.name }
-                Log.i("方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
-            }
-            } catch (e: Throwable) {
-                Log.i("❌android.play.core.integrity: ${e.message}")
-            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.play.core.integrity.IntegrityManagerImpl",
                 lpparam.classLoader,
