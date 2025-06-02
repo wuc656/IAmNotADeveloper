@@ -117,11 +117,11 @@ class Hook : IXposedHookLoadPackage {
                 }
 
             } catch (e: XposedHelpers.ClassNotFoundError) {
-                Log.i("$LOG_TAG Error: Target class $TARGET_CLASS_NAME not found.")
+                Log.i("Error: Target class $TARGET_CLASS_NAME not found.")
                 // 修改下面這一行
                 Log.i(android.util.Log.getStackTraceString(e)) // 將 Throwable 轉換為堆疊追蹤字串
             } catch (t: Throwable) {
-                Log.i("$LOG_TAG An unexpected error occurred during dynamic hook setup.")
+                Log.i("An unexpected error occurred during dynamic hook setup.")
                 // 修改下面這一行
                 Log.i(android.util.Log.getStackTraceString(t)) // 將 Throwable 轉換為堆疊追蹤字串
             }
