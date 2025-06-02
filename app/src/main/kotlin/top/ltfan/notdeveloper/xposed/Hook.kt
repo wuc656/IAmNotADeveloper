@@ -38,49 +38,73 @@ class Hook : IXposedHookLoadPackage {
     // 將這些常量定義在類級別或者 companion object 中
     companion object {
         private const val TARGET_PACKAGE_NAME = "com.android.vending" // Google Play 商店包名
-        private const val TARGET_CLASS_NAME = "com.google.android.finsky.integrityservice.IntegrityService"
     }
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
-            Log.i("Attempting to dynamically hook method in " + TARGET_CLASS_NAME);
-                val targetClass = XposedHelpers.findClass(TARGET_CLASS_NAME, lpparam.classLoader)
-
-                // 定義目標方法的簽名特徵
-                val expectedReturnType = IBinder::class.java
-                val expectedParamTypes = arrayOf(Intent::class.java) // Kotlin 陣列
-                val candidateMethods = mutableListOf<Method>() // Kotlin 可變列表
-
-                // 遍歷類的所有聲明方法
-                for (method in targetClass.declaredMethods) {
-                    // 1. 檢查返回類型
-                    if (method.returnType != expectedReturnType) {
-                        continue
-                    }
-
-                    // 2. 檢查參數類型和數量
-                    // 在 Kotlin 中比較陣列內容使用 contentEquals
-                    if (!method.parameterTypes.contentEquals(expectedParamTypes)) {
-                        continue
-                    }
-
-                    // 3. 檢查修飾符 (可選，但更精確)
-                    val modifiers = method.modifiers
-                    if (!Modifier.isPublic(modifiers)) { // 必須是 public
-                        continue
-                    }
-                    if (!Modifier.isFinal(modifiers)) { // 必須是 final
-                        // 如果 final 不是絕對必要條件，可以註解掉這行檢查
-                        continue
-                    }
-
-                    // 如果所有條件都符合，則將此方法視為候選方法
-                    candidateMethods.add(method)
-                    Log.i("IAmNotADeveloper: Found potential method: ${method.name} with signature ${method.toGenericString()}")
+            Log.i("嘗試動態讀取 IntegrityService");
+            val targetClass = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
+            // 定義目標方法的簽名特徵
+            val expectedReturnType = IBinder::class.java
+            val expectedParamTypes = arrayOf(Intent::class.java) // Kotlin 陣列
+            val candidateMethods = mutableListOf<Method>() // Kotlin 可變列表
+            // 遍歷類的所有聲明方法
+            for (method in targetClass.declaredMethods) {
+                 // 1. 檢查返回類型
+                if (method.returnType != expectedReturnType) {
+                    continue
                 }
-
-                when {
-                    candidateMethods.size == 1 -> {
+                // 2. 檢查參數類型和數量
+                // 在 Kotlin 中比較陣列內容使用 contentEquals
+                if (!method.parameterTypes.contentEquals(expectedParamTypes)) {
+                    continue
+                }
+                // 3. 檢查修飾符 (可選，但更精確)
+                val modifiers = method.modifiers
+                if (!Modifier.isPublic(modifiers)) { // 必須是 public
+                    continue
+                }
+                if (!Modifier.isFinal(modifiers)) { // 必須是 final
+                    // 如果 final 不是絕對必要條件，可以註解掉這行檢查
+                    continue
+                }
+                // 如果所有條件都符合，則將此方法視為候選方法
+                candidateMethods.add(method)
+                "找到: ${method.toGenericString()} 的 ${method.name}"
+            }
+            Log.i("嘗試動態讀取 BackgroundIntegrityService")
+            val targetClass1 =XposedHelpers.findClass("com.google.android.finsky.BackgroundIntegrityService.IntegrityService",                            lpparam.classLoader                    )
+            // 定義目標方法的簽名特徵
+            val expectedReturnType1 = IBinder::class.java
+            val expectedParamTypes1 = arrayOf(Intent::class.java) // Kotlin 陣列
+            // 遍歷類的所有聲明方法
+            for (method in targetClass1.declaredMethods) {
+                // 1. 檢查返回類型
+                if (method.returnType != expectedReturnType1) {
+                    continue
+                }
+                // 2. 檢查參數類型和數量
+                // 在 Kotlin 中比較陣列內容使用 contentEquals
+                if (!method.parameterTypes.contentEquals(expectedParamTypes1)) {
+                    continue
+                }
+                // 3. 檢查修飾符 (可選，但更精確)
+                val modifiers = method.modifiers
+                if (!Modifier.isPublic(modifiers)) { // 必須是 public
+                    continue
+                }
+                if (!Modifier.isFinal(modifiers)) { // 必須是 final
+                    // 如果 final 不是絕對必要條件，可以註解掉這行檢查
+                    continue
+                }
+                // 如果所有條件都符合，則將此方法視為候選方法
+                candidateMethods.add(method)
+                Log.i(
+                        "找到: ${method.toGenericString()} 的 ${method.name}"
+                )
+            }
+            when {
+                    candidateMethods.size >= 1 -> {
                         val methodToHook = candidateMethods[0]
                         val foundMethodName = methodToHook.name // 動態獲取到的方法名
                         Log.i("IAmNotADeveloper: Dynamically found method to hook: $foundMethodName")
@@ -100,19 +124,9 @@ class Hook : IXposedHookLoadPackage {
                                 // 在這裡可以添加你的邏輯
                             }
                         })
-                        Log.i("IAmNotADeveloper: Successfully hooked $TARGET_CLASS_NAME.$foundMethodName")
-
+                        Log.i("成功hook $foundMethodName")
                     }
-                    candidateMethods.isEmpty() -> {
-                        Log.i("IAmNotADeveloper: Error: No method found matching the signature in $TARGET_CLASS_NAME")
-                    }
-                    else -> {
-                        Log.i("IAmNotADeveloper: Error: Multiple methods found matching the signature in $TARGET_CLASS_NAME. Needs further refinement.")
-                        for (m in candidateMethods) {
-                            Log.i("  - Candidate: ${m.name} (${m.toGenericString()})")
-                        }
-                    }
-                }
+            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
