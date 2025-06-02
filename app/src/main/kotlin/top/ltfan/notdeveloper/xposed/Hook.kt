@@ -82,7 +82,7 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        *Item.currentSdkInt = 32
+                        Item.currentSdkInt = 32
                         Log.i("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
@@ -90,7 +90,7 @@ class Hook : IXposedHookLoadPackage {
                             Thread.sleep(3000) // 確保 caller thread 已經繼續
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                            *Item.currentSdkInt = 35
+                            Item.currentSdkInt = 35
                             Log.i("還原 SDK_INT 為 35")
                             Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }.start()
@@ -106,7 +106,7 @@ class Hook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                         XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                        *Item.currentSdkInt = 32
+                        Item.currentSdkInt = 32
                         Log.i("暫時修改 SDK_INT 為 32")
                     }
                     override fun afterHookedMethod(param: MethodHookParam) {
@@ -115,7 +115,7 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
                             Log.i("Background 還原 SDK_INT 為 35")
-                            *Item.currentSdkInt = 35
+                            Item.currentSdkInt = 35
                             Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }.start()
                     }
@@ -132,7 +132,7 @@ class Hook : IXposedHookLoadPackage {
                         if (activity.packageName == "com.android.vending") {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 35)
-                            *Item.currentSdkInt = 35
+                            Item.currentSdkInt = 35
                             Log.i("使用者進入 Google Play SDK_INT 設為 35")
                         }
                     }
@@ -148,15 +148,15 @@ class Hook : IXposedHookLoadPackage {
                             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
                             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
                             Log.i("使用者離開 Google Play SDK_INT 改回 32")
-                            *Item.currentSdkInt = 32
+                            Item.currentSdkInt = 32
                             Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
                         }
                     }
                 }
             ) */
             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", *Item.currentSdkInt) // 重新設定SDK_INT
-            Log.i("重新設定SDK_INT 為: ${*Item.currentSdkInt}")
+            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", Item.currentSdkInt) // 重新設定SDK_INT
+            Log.i("重新設定SDK_INT 為: ${Item.currentSdkInt}")
         }
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
