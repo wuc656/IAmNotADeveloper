@@ -216,6 +216,16 @@ class Hook : IXposedHookLoadPackage {
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
         if (lpparam.packageName.startsWith("com.google.android.gms")) {
+             try {
+            val dexFile = DexFile(lpparam.appInfo.sourceDir)
+            val entries = dexFile.entries()
+            while (entries.hasMoreElements()) {
+                val className = entries.nextElement()
+                    Log.i("找到類: $className")
+            }
+        } catch (e: Throwable) {
+            Log.i("❌ DexFile 錯誤: ${e.message}")
+        }
             try {
             val clazz = XposedHelpers.findClass(
                 "com.google.android.play.core.integrity",
@@ -225,9 +235,9 @@ class Hook : IXposedHookLoadPackage {
                 val paramTypes = method.parameterTypes.joinToString { it.name }
                 Log.i("方法: ${method.name}($paramTypes) -> ${method.returnType.name}")
             }
-        } catch (e: Throwable) {
-            Log.i("❌android.play.core.integrity: ${e.message}")
-        }
+            } catch (e: Throwable) {
+                Log.i("❌android.play.core.integrity: ${e.message}")
+            }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.play.core.integrity.IntegrityManagerImpl",
                 lpparam.classLoader,
