@@ -26,6 +26,7 @@ import android.os.IBinder
 //import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam // 確保 LoadPackageParam 被正確導入
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import android.util.Log
 
 import android.os.Build
 object SdkState {
@@ -116,11 +117,13 @@ class Hook : IXposedHookLoadPackage {
                 }
 
             } catch (e: XposedHelpers.ClassNotFoundError) {
-                Log.i("IAmNotADeveloper: Error: Target class $TARGET_CLASS_NAME not found.")
-                Log.i(e) // XposedBridge 可以直接記錄 Throwable
-            } catch (t: Throwable) { // 捕獲所有其他異常
-                Log.i("IAmNotADeveloper: An unexpected error occurred during dynamic hook setup.")
-                Log.i(t)
+                Log.i("$LOG_TAG Error: Target class $TARGET_CLASS_NAME not found.")
+                // 修改下面這一行
+                Log.i(android.util.Log.getStackTraceString(e)) // 將 Throwable 轉換為堆疊追蹤字串
+            } catch (t: Throwable) {
+                Log.i("$LOG_TAG An unexpected error occurred during dynamic hook setup.")
+                // 修改下面這一行
+                Log.i(android.util.Log.getStackTraceString(t)) // 將 Throwable 轉換為堆疊追蹤字串
             }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
