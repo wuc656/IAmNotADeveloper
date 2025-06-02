@@ -116,14 +116,8 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
 
-            } catch (e: XposedHelpers.ClassNotFoundError) {
-                Log.i("Error: Target class $TARGET_CLASS_NAME not found.")
-                // 修改下面這一行
-                Log.i(android.util.Log.getStackTraceString(e)) // 將 Throwable 轉換為堆疊追蹤字串
-            } catch (t: Throwable) {
-                Log.i("An unexpected error occurred during dynamic hook setup.")
-                // 修改下面這一行
-                Log.i(android.util.Log.getStackTraceString(t)) // 將 Throwable 轉換為堆疊追蹤字串
+            } catch (e) {
+                Log.i(e) // 將 Throwable 轉換為堆疊追蹤字串
             }
             XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
