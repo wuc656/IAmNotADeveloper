@@ -26,7 +26,6 @@ import android.os.IBinder
 //import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam // 確保 LoadPackageParam 被正確導入
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import android.util.Log
 
 import android.os.Build
 object SdkState {
