@@ -16,12 +16,6 @@ import top.ltfan.notdeveloper.Item
 import java.lang.Runtime
 import android.app.Activity
 
-import android.os.Build
-object SdkState {
-    // 用於儲存全域 SDK_INT 狀態（初始化為原始值）
-    var currentSdkInt: Int = Build.VERSION.SDK_INT
-}
-
 // 必要的導入語句
 import android.content.Intent
 import android.os.IBinder
@@ -32,6 +26,12 @@ import android.os.IBinder
 //import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam // 確保 LoadPackageParam 被正確導入
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+
+import android.os.Build
+object SdkState {
+    // 用於儲存全域 SDK_INT 狀態（初始化為原始值）
+    var currentSdkInt: Int = Build.VERSION.SDK_INT
+}
 
 @Keep
 class Hook : IXposedHookLoadPackage {
