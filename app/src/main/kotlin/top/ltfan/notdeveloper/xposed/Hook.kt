@@ -27,8 +27,6 @@ import android.os.IBinder
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-import dalvik.system.DexFile
-
 import android.os.Build
 object SdkState {
     // 用於儲存全域 SDK_INT 狀態（初始化為原始值）
@@ -218,17 +216,6 @@ class Hook : IXposedHookLoadPackage {
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
         if (lpparam.packageName.startsWith("com.google.android.gms")) {
-            val dexFiles = DexFile::class.java.getDeclaredConstructor().declaringClass
-            val apkPath = lpparam.appInfo.sourceDir
-            val dexFile = DexFile(apkPath)
-            val classEnum = dexFile.entries()
-
-            while (classEnum.hasMoreElements()) {
-                val className = classEnum.nextElement()
-                if (className.contains("integrity", ignoreCase = true)) {
-                Log.i("C名稱: $className")
-                }
-            }
             try {
             val clazz = XposedHelpers.findClass(
                 "com.google.android.play.core.integrity",
