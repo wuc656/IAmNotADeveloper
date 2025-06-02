@@ -44,66 +44,43 @@ class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         Log.i("開啟: ${lpparam.packageName}")
         if (lpparam.packageName.startsWith("com.android.vending")) {
-            Log.i("嘗試動態讀取 IntegrityService");
+            //Log.i("嘗試動態讀取 IntegrityService");
             val targetClass = XposedHelpers.findClass("com.google.android.finsky.integrityservice.IntegrityService", lpparam.classLoader)
-            // 定義目標方法的簽名特徵
             val expectedReturnType = IBinder::class.java
             val expectedParamTypes = arrayOf(Intent::class.java) // Kotlin 陣列
             val candidateMethods = mutableListOf<Method>() // Kotlin 可變列表
-            // 遍歷類的所有聲明方法
             for (method in targetClass.declaredMethods) {
-                 // 1. 檢查返回類型
                 if (method.returnType != expectedReturnType) {
                     continue
                 }
-                // 2. 檢查參數類型和數量
-                // 在 Kotlin 中比較陣列內容使用 contentEquals
                 if (!method.parameterTypes.contentEquals(expectedParamTypes)) {
                     continue
                 }
-                // 3. 檢查修飾符 (可選，但更精確)
                 val modifiers = method.modifiers
-                if (!Modifier.isPublic(modifiers)) { // 必須是 public
+                if (!Modifier.isPublic(modifiers)) {
                     continue
                 }
-                if (!Modifier.isFinal(modifiers)) { // 必須是 final
-                    // 如果 final 不是絕對必要條件，可以註解掉這行檢查
+                if (!Modifier.isFinal(modifiers)) {
                     continue
                 }
-                // 如果所有條件都符合，則將此方法視為候選方法
-                candidateMethods.add(method)
-                "找到: ${method.toGenericString()} 的 ${method.name}"
             }
-            Log.i("嘗試動態讀取 BackgroundIntegrityService")
-            val targetClass1 =XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService",                            lpparam.classLoader                    )
-            // 定義目標方法的簽名特徵
-            val expectedReturnType1 = IBinder::class.java
-            val expectedParamTypes1 = arrayOf(Intent::class.java) // Kotlin 陣列
-            // 遍歷類的所有聲明方法
+            //Log.i("嘗試動態讀取 BackgroundIntegrityService")
+            val targetClass1 =XposedHelpers.findClass("com.google.android.finsky.integrityservice.BackgroundIntegrityService",lpparam.classLoader)
             for (method in targetClass1.declaredMethods) {
-                // 1. 檢查返回類型
-                if (method.returnType != expectedReturnType1) {
+                if (method.returnType != expectedReturnType) {
                     continue
                 }
-                // 2. 檢查參數類型和數量
-                // 在 Kotlin 中比較陣列內容使用 contentEquals
-                if (!method.parameterTypes.contentEquals(expectedParamTypes1)) {
+                if (!method.parameterTypes.contentEquals(expectedParamTypes)) {
                     continue
                 }
-                // 3. 檢查修飾符 (可選，但更精確)
                 val modifiers = method.modifiers
-                if (!Modifier.isPublic(modifiers)) { // 必須是 public
+                if (!Modifier.isPublic(modifiers)) {
                     continue
                 }
-                if (!Modifier.isFinal(modifiers)) { // 必須是 final
-                    // 如果 final 不是絕對必要條件，可以註解掉這行檢查
+                if (!Modifier.isFinal(modifiers)) {
                     continue
                 }
-                // 如果所有條件都符合，則將此方法視為候選方法
                 candidateMethods.add(method)
-                Log.i(
-                        "找到: ${method.toGenericString()} 的 ${method.name}"
-                )
             }
             when {
                 candidateMethods.size >= 1 -> {
@@ -113,10 +90,13 @@ class Hook : IXposedHookLoadPackage {
                     // 使用獲取到的 Method 物件進行 Hook
                     XposedBridge.hookMethod(methodToHook, object : XC_MethodHook() {
                         override fun beforeHookedMethod(param: MethodHookParam) {
-                            val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
-                            XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
-                            SdkState.currentSdkInt = 32
-                            Log.i("暫時修改 SDK_INT 為 32")
+                            if (SdkState.currentSdkInt != 32) {
+                                Runtime.getRuntime().exec(arrayOf("su", "-c", "am force-stop com.android.vending"))
+                                val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
+                                XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", 32) // 偽裝為 Android 12
+                                SdkState.currentSdkInt = 32
+                                Log.i("暫時修改 SDK_INT 為 32")
+                            }
                         }
                         override fun afterHookedMethod(param: MethodHookParam) {
                             Thread {
@@ -132,7 +112,7 @@ class Hook : IXposedHookLoadPackage {
                     Log.i("成功hook $foundMethodName")
                 }
             }
-            XposedHelpers.findAndHookMethod(
+            /* XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
                 "ml",
@@ -179,7 +159,7 @@ class Hook : IXposedHookLoadPackage {
                         }.start()
                     }
                 }
-            )
+            ) */
             XposedHelpers.findAndHookMethod(
                 "android.app.Activity",
                 lpparam.classLoader,
@@ -197,7 +177,7 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             )
-            XposedHelpers.findAndHookMethod(
+            /* XposedHelpers.findAndHookMethod(
                 android.app.Activity::class.java,
                 "onStop",
                 object : XC_MethodHook() {
@@ -212,12 +192,12 @@ class Hook : IXposedHookLoadPackage {
                         }
                     }
                 }
-            )
+            ) */
             val buildVersionClass = XposedHelpers.findClass("android.os.Build\$VERSION", lpparam.classLoader)
             XposedHelpers.setStaticIntField(buildVersionClass, "SDK_INT", SdkState.currentSdkInt) // 重新設定SDK_INT
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
-        if (lpparam.packageName.startsWith("com.google.android.gms")) {
+        /* if (lpparam.packageName.startsWith("com.google.android.gms")) {
              try {
             val dexFile = DexFile(lpparam.appInfo.sourceDir)
             val entries = dexFile.entries()
@@ -225,9 +205,9 @@ class Hook : IXposedHookLoadPackage {
                 val className = entries.nextElement()
                     Log.i("找到類: $className")
             }
-        } catch (e: Throwable) {
-            Log.i("❌ DexFile 錯誤: ${e.message}")
-        }
+            } catch (e: Throwable) {
+                Log.i("❌ DexFile 錯誤: ${e.message}")
+            }
             try {
             val clazz = XposedHelpers.findClass(
                 "com.google.android.play.core.integrity",
@@ -257,7 +237,7 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             )
-        }
+        } */
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
