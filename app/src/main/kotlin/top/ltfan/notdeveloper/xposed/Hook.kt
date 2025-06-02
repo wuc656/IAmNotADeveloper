@@ -113,7 +113,7 @@ class Hook : IXposedHookLoadPackage {
                     }
                 }
             }
-            /* XposedHelpers.findAndHookMethod(
+            XposedHelpers.findAndHookMethod(
                 "com.google.android.finsky.integrityservice.IntegrityService",
                 lpparam.classLoader,
                 "ml",
@@ -160,7 +160,7 @@ class Hook : IXposedHookLoadPackage {
                         }.start()
                     }
                 }
-            ) */
+            )
             XposedHelpers.findAndHookMethod(
                 "android.app.Activity",
                 lpparam.classLoader,
