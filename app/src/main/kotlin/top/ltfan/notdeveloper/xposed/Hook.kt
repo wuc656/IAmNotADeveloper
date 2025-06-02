@@ -216,6 +216,17 @@ class Hook : IXposedHookLoadPackage {
             Log.i("重新設定SDK_INT 為: ${SdkState.currentSdkInt}")
         }
         if (lpparam.packageName.startsWith("com.google.android.gms")) {
+            val dexFiles = DexFile::class.java.getDeclaredConstructor().declaringClass
+val apkPath = lpparam.appInfo.sourceDir
+val dexFile = DexFile(apkPath)
+val classEnum = dexFile.entries()
+
+while (classEnum.hasMoreElements()) {
+    val className = classEnum.nextElement()
+    if (className.contains("integrity", ignoreCase = true)) {
+       Log.i("C名稱: $className")
+    }
+}
             try {
             val clazz = XposedHelpers.findClass(
                 "com.google.android.gms.integrity.service.IntegrityService",
