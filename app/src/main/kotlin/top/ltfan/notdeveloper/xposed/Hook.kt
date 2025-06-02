@@ -27,6 +27,8 @@ import android.os.IBinder
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
+import dalvik.system.DexFile
+
 import android.os.Build
 object SdkState {
     // 用於儲存全域 SDK_INT 狀態（初始化為原始值）
