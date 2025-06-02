@@ -22,6 +22,17 @@ object SdkState {
     var currentSdkInt: Int = Build.VERSION.SDK_INT
 }
 
+// 必要的導入語句
+import android.content.Intent
+import android.os.IBinder
+//import de.robv.android.xposed.IXposedHookLoadPackage
+//import de.robv.android.xposed.XC_MethodHook
+//import de.robv.android.xposed.XposedBridge
+//import de.robv.android.xposed.XposedHelpers
+//import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam // 確保 LoadPackageParam 被正確導入
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+
 @Keep
 class Hook : IXposedHookLoadPackage {
     // 將這些常量定義在類級別或者 companion object 中
