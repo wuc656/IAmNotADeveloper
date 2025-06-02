@@ -11,5 +11,6 @@ enum class Item(val key: String, @StringRes val nameId: Int) {
         val oldApiItems = listOf(DevelopmentSettingsEnabled, AdbEnabled)
         val newApiItems = listOf(AdbWifiEnabled)
         val settingGlobalItems = listOf(DevelopmentSettingsEnabled, AdbEnabled, AdbWifiEnabled)
+        val currentSdkInt = 32
     }
 }
